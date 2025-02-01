@@ -65,6 +65,8 @@ public class StepDefinition7 {
 		respec=new ResponseSpecBuilder().build();
 		response=res.when().post(endpoint).then().log().all().spec(respec)
 				.extract().response();
+
+		System.out.println("Hello");
 		
 	    
 	}
