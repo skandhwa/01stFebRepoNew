@@ -1,31 +1,36 @@
 const { test, expect } = require('@playwright/test');
 
-test('POST API Test with Bearer Token (JavaScript)', async ({ request }) => {
-  // 1. Create a new API Request context
-  const apiContext = await request.newContext({
-    baseURL: 'https://your-api-url.com', // ✅ Replace with your API base URL
-    extraHTTPHeaders: {
-      'Authorization': `Bearer YOUR_BEARER_TOKEN`, // ✅ Put your token here
+test('POST API test with body, token, and headers', async ({ request }) => {
+  // Define your API URL
+  const apiUrl = 'https://api.example.com/data';
+
+  // Define your bearer token
+  const token = 'your_real_bearer_token_here';
+
+  // Define your request body
+  const requestBody = {
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'admin'
+  };
+
+  // Make the POST request
+  const response = await request.post(apiUrl, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
+      'Custom-Header': 'CustomValue' // optional additional headers
     },
+    data: requestBody, // <-- Playwright uses `data` for body
   });
 
-  // 2. Send a POST request
-  const response = await apiContext.post('/your-endpoint', {  // ✅ Replace with your API endpoint
-    data: {
-      key1: 'value1',
-      key2: 'value2',
-      // Add more fields if needed
-    },
-  });
-
-  // 3. Validate the response
-  expect(response.ok()).toBeTruthy(); // Check if response is 2xx
-  expect(response.status()).toBe(201); // 201 Created, or change based on your API
-
+  // Assert response status
+  expect(response.status()).toBe(201); // or 200, depending on your API
+  
+  // Parse and validate response body
   const responseBody = await response.json();
-  console.log('Response Body:', responseBody);
 
-  // 4. Example: validate a field in the response
-  expect(responseBody).toHaveProperty('id'); // Assuming the response has an 'id' field
+  expect(responseBody).toHaveProperty('id'); // Check if 'id' exists
+  expect(responseBody.name).toBe('John Doe'); // Validate returned name
+  expect(responseBody.email).toBe('john@example.com'); // Validate returned email
 });
