@@ -1,0 +1,31 @@
+const { test, expect } = require('@playwright/test');
+
+test('POST API Test with Bearer Token (JavaScript)', async ({ request }) => {
+  // 1. Create a new API Request context
+  const apiContext = await request.newContext({
+    baseURL: 'https://your-api-url.com', // ✅ Replace with your API base URL
+    extraHTTPHeaders: {
+      'Authorization': `Bearer YOUR_BEARER_TOKEN`, // ✅ Put your token here
+      'Content-Type': 'application/json',
+    },
+  });
+
+  // 2. Send a POST request
+  const response = await apiContext.post('/your-endpoint', {  // ✅ Replace with your API endpoint
+    data: {
+      key1: 'value1',
+      key2: 'value2',
+      // Add more fields if needed
+    },
+  });
+
+  // 3. Validate the response
+  expect(response.ok()).toBeTruthy(); // Check if response is 2xx
+  expect(response.status()).toBe(201); // 201 Created, or change based on your API
+
+  const responseBody = await response.json();
+  console.log('Response Body:', responseBody);
+
+  // 4. Example: validate a field in the response
+  expect(responseBody).toHaveProperty('id'); // Assuming the response has an 'id' field
+});
