@@ -1,0 +1,79 @@
+Use Playwright test scripts to:
+
+Identify the Jira issue/test case (e.g., JIRA-123).
+
+After the test passes, send a request to Jira’s API to:
+
+Add a comment, or
+
+Transition the issue (e.g., from "To Do" to "Passed").
+
+🛠️ Step-by-Step Setup
+Step 1: Add Jira Issue Key to Your Test
+In Playwright, associate your test with a Jira issue:
+
+ts
+Copy
+Edit
+test('Login functionality [JIRA-123]', async ({ page }) => {
+  // your test code
+});
+Or store issue key separately for automation:
+
+ts
+Copy
+Edit
+const jiraIssueKey = 'JIRA-123';
+
+
+
+Step 2: After Test Passes, Call Jira API
+Create a helper to mark the test as passed by:
+
+Adding a comment
+
+Optionally transitioning the issue's status
+
+ts
+Copy
+Edit
+import axios from 'axios';
+
+async function markTestPassedInJira(issueKey: string) {
+  const jiraDomain = 'https://your-domain.atlassian.net';
+  const email = 'your-email@example.com';
+  const apiToken = 'your-jira-api-token';
+
+  // Add a comment
+  await axios.post(
+    `${jiraDomain}/rest/api/3/issue/${issueKey}/comment`,
+    {
+      body: '✅ Automated test passed via Playwright.',
+    },
+    {
+      auth: {
+        username: email,
+        password: apiToken,
+      },
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+}
+Step 3: Call the Function on Test Success
+Wrap it in your test:
+
+ts
+Copy
+Edit
+test('Login functionality [JIRA-123]', async ({ page }) => {
+  const jiraIssueKey = 'JIRA-123';
+  // run test
+  await page.goto('https://example.com/login');
+  await expect(page).toHaveTitle(/Login/);
+
+  // if all above passed, mark it in Jira
+  await markTestPassedInJira(jiraIssueKey);
+});
