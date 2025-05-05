@@ -1,0 +1,75 @@
+npm install axios
+2. Jira API Token
+You'll need:
+
+Your Jira domain (e.g., https://yourdomain.atlassian.net)
+
+Your email and Jira API token
+
+3. Sample Code to Update an Issue
+javascript
+Copy
+Edit
+const axios = require('axios');
+
+const JIRA_EMAIL = 'you@example.com';
+const JIRA_TOKEN = 'your-api-token';
+const JIRA_DOMAIN = 'https://yourdomain.atlassian.net';
+const ISSUE_KEY = 'PROJ-123'; // Jira test case key
+
+const auth = Buffer.from(`${JIRA_EMAIL}:${JIRA_TOKEN}`).toString('base64');
+
+async function markTestCasePassed(issueKey) {
+  try {
+    // Option 1: Add a comment
+    await axios.post(`${JIRA_DOMAIN}/rest/api/3/issue/${issueKey}/comment`, {
+      body: "✅ Test passed via Playwright automation.",
+    }, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    // Option 2: Transition issue to "Passed" (you need to know the transition ID)
+    await axios.post(`${JIRA_DOMAIN}/rest/api/3/issue/${issueKey}/transitions`, {
+      transition: {
+        id: "31" // Replace with actual transition ID to "Passed" or "Done"
+      }
+    }, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+        'Content-Type': 'application/json',
+      }
+    });
+
+    console.log(`Test case ${issueKey} marked as passed.`);
+  } catch (err) {
+    console.error('Failed to update Jira:', err.response?.data || err.message);
+  }
+}
+
+markTestCasePassed(ISSUE_KEY);
+How to Find Transition IDs
+Use this endpoint to list available transitions for a given issue:
+
+bash
+Copy
+Edit
+GET /rest/api/3/issue/PROJ-123/transitions
+This will show the transition IDs and names (like “Done”, “Passed”, etc.).
+
+Integration with Playwright
+In your Playwright test script, call this function conditionally on test success:
+
+javascript
+Copy
+Edit
+test('example test', async ({ page }) => {
+  try {
+    // ... your test code ...
+    await markTestCasePassed('PROJ-123');
+  } catch (error) {
+    console.error("Test failed:", error);
+  }
+});
